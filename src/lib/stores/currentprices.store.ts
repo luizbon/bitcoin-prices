@@ -16,12 +16,16 @@ user.subscribe(async (value) => {
 		)
 	];
 	for (const coin of distinctCoins) {
-		const price = await liveCoinWatchApi.getCurrentCoinPrice(coin.currency, coin.code);
-		currentPrices.update((prices) => {
-			return {
-				...prices,
-				[`${coin.currency}_${coin.code}`]: price
-			};
-		});
+		try {
+			const price = await liveCoinWatchApi.getCurrentCoinPrice(coin.currency, coin.code);
+			currentPrices.update((prices) => {
+				return {
+					...prices,
+					[`${coin.currency}_${coin.code}`]: price
+				};
+			});
+		} catch (error) {
+			console.error(error);
+		}
 	}
 });

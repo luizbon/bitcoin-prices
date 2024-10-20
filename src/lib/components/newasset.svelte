@@ -12,7 +12,7 @@
 	} from '@sveltestrap/sveltestrap';
 	import { fiats } from '$lib/stores/fiats.store';
 	import { user } from '$lib/stores/user.store';
-	import { liveCoinWatchApi, type IFiat } from '$lib/sdks/livecoinwatch.api';
+	import { liveCoinWatchApi } from '$lib/sdks/livecoinwatch.api';
 	import * as yup from 'yup';
 
 	export let isOpen = false;
@@ -24,10 +24,6 @@
 	let name = '';
 	let currencySymbol = '$';
 	let validated: boolean | undefined = undefined;
-	let nameValid: boolean | undefined = undefined;
-	let costValid: boolean | undefined = undefined;
-	let dateValid: boolean | undefined = undefined;
-	let currencyValid: boolean | undefined = undefined;
 	let data: any = [];
 	let validationErrors: { [key: string]: string } = {};
 

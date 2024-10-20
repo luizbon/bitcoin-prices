@@ -17,7 +17,7 @@ interface ICoinPriceHisroty {
 	price?: IHistoryItem;
 }
 
-let api_key: string | undefined = undefined;
+let api_key: string = '';
 
 livecoinwatchApiKey.subscribe((value) => {
 	api_key = value;
@@ -29,9 +29,6 @@ const getAllFiats = async (
 		init?: RequestInit | undefined
 	) => Promise<Response> = fetch
 ) => {
-	if (!api_key) {
-		return [];
-	}
 	const response = await localFetch(`${PUBLIC_LIVECOINWATCH_URL}/fiats/all`, {
 		method: 'POST',
 		headers: {
@@ -39,6 +36,12 @@ const getAllFiats = async (
 			'x-api-key': api_key
 		}
 	});
+
+	if (!response.ok) {
+		const responseText = await response.text();
+		throw new Error(`Failed to fetch data ${response.statusText}: ${responseText}`);
+	}
+
 	const data = await response.json();
 	return data.sort((a: IFiat, b: IFiat) => a.code.localeCompare(b.code));
 };
@@ -52,9 +55,6 @@ const getCoinPrice = async (
 		init?: RequestInit | undefined
 	) => Promise<Response> = fetch
 ) => {
-	if (!api_key) {
-		return [];
-	}
 	const startInEpoch = date.getTime();
 	const endInEpoch = date.getTime() + 24 * 60 * 60 * 1000;
 	const response = await localFetch(`${PUBLIC_LIVECOINWATCH_URL}/coins/single/history`, {
@@ -102,9 +102,6 @@ const getCurrentCoinPrice = async (
 		init?: RequestInit | undefined
 	) => Promise<Response> = fetch
 ) => {
-	if (!api_key) {
-		return [];
-	}
 	const response = await localFetch(`${PUBLIC_LIVECOINWATCH_URL}/coins/single`, {
 		method: 'POST',
 		headers: {
