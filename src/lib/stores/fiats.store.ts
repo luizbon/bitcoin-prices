@@ -3,6 +3,10 @@ import { liveCoinWatchApi } from '$lib/sdks/livecoinwatch.api';
 
 export const fiats = writable({});
 
-const data = await liveCoinWatchApi.getAllFiats(fetch);
+try {
+	const data = await liveCoinWatchApi.getAllFiats(fetch);
 
-fiats.set(data);
+	fiats.set(data);
+} catch (error) {
+	console.error('Failed to fetch fiats', error);
+}

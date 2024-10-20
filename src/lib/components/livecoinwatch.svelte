@@ -2,7 +2,7 @@
 	import { livecoinwatchApiKey } from '$lib/stores/livecoinwatch.store';
 	import { Button, Input, Modal, ModalBody, ModalFooter } from '@sveltestrap/sveltestrap';
 
-	let apiKey: { value: string } = { value: '' };
+	let apiKey: { value: string | undefined } = { value: undefined };
 	export let isOpen: boolean;
 	export let onClose: () => void;
 

@@ -1,15 +1,18 @@
 import { writable } from 'svelte/store';
-import { PUBLIC_LIVECOINWATCH_API_KEY } from '$env/static/public';
+import { env } from '$env/dynamic/public';
 import { browser } from '$app/environment';
 
 const initialApiKey = browser
-	? localStorage.livecoinwatchApiKey || PUBLIC_LIVECOINWATCH_API_KEY
-	: PUBLIC_LIVECOINWATCH_API_KEY;
+	? localStorage.livecoinwatchApiKey || env.PUBLIC_LIVECOINWATCH_API_KEY
+	: env.PUBLIC_LIVECOINWATCH_API_KEY;
 
 const { subscribe, set } = writable(initialApiKey);
 
 subscribe((value) => {
-	if (browser) localStorage.livecoinwatchApiKey = value;
+	if (browser) {
+		if (value === undefined) localStorage.removeItem('livecoinwatchApiKey');
+		else localStorage.livecoinwatchApiKey = value;
+	}
 });
 
 export const livecoinwatchApiKey = {
