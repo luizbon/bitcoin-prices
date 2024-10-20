@@ -20,6 +20,7 @@ jobs:
         env:
           BASE_PATH: '/${{ github.event.repository.name }}'
           PUBLIC_LIVECOINWATCH_API_KEY: undefined
+          PUBLIC_LIVECOINWATCH_URL: https://api.livecoinwatch.com
         run: |
           npm run build
       - name: Upload Artifacts
