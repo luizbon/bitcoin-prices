@@ -84,6 +84,13 @@
 		<Button on:click={openAsset} class={assetButtonDisplay}>New Assets</Button>
 		<Button color={currentColorMode} on:click={openApiKey}>{apiKey.value}</Button>
 		<Button color={currentColorMode} on:click={clearData}><Icon name="fire" /></Button>
+		<Button
+			color={currentColorMode}
+			target="_blank"
+			href="https://github.com/luizbon/bitcoin-prices"
+		>
+			<Icon name="github" />
+		</Button>
 	</div>
 </Navbar>
 <Container>
