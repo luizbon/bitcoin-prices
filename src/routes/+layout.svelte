@@ -10,6 +10,7 @@
 		useColorMode
 	} from '@sveltestrap/sveltestrap';
 	import { livecoinwatchApiKey } from '$lib/stores/livecoinwatch.store';
+	import { fiats } from '$lib/stores/fiats.store';
 	import { user } from '$lib/stores/user.store';
 	import ApiKey from '$lib/components/livecoinwatch.svelte';
 	import NewAsset from '$lib/components/newasset.svelte';
@@ -18,6 +19,7 @@
 	let toggleColorMode: () => void;
 	let isApiKeyOpen: boolean = false;
 	let isAssetOpen: boolean = false;
+	let assetButtonDisplay: string = 'd-none';
 	const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
 
 	if (prefersDarkScheme.matches) {
@@ -25,11 +27,19 @@
 	} else {
 		useColorMode('light');
 	}
-	livecoinwatchApiKey.subscribe((value) => {
+	livecoinwatchApiKey.subscribe(async (value) => {
 		if (value) {
 			apiKey.value = value.length > 6 ? value.slice(0, 6) + '...' : value;
 		} else {
 			apiKey.value = 'No API Key';
+		}
+		await fiats.refresh();
+	});
+	fiats.subscribe((value) => {
+		if (Array.isArray(value) && value.length > 0) {
+			assetButtonDisplay = 'd-inline-block';
+		} else {
+			assetButtonDisplay = 'd-none';
 		}
 	});
 
@@ -71,7 +81,7 @@
 				{/if}
 			</Button>
 		</ThemeToggler>
-		<Button on:click={openAsset}>New Assets</Button>
+		<Button on:click={openAsset} class={assetButtonDisplay}>New Assets</Button>
 		<Button color={currentColorMode} on:click={openApiKey}>{apiKey.value}</Button>
 		<Button color={currentColorMode} on:click={clearData}><Icon name="fire" /></Button>
 	</div>

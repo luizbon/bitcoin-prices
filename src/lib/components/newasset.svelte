@@ -8,7 +8,8 @@
 		Button,
 		Modal,
 		ModalBody,
-		ModalFooter
+		ModalFooter,
+		Label
 	} from '@sveltestrap/sveltestrap';
 	import { fiats } from '$lib/stores/fiats.store';
 	import { user } from '$lib/stores/user.store';
@@ -20,7 +21,7 @@
 
 	let currency = '';
 	let cost: number = 0;
-	let date: Date = new Date();
+	let date: Date | undefined = undefined;
 	let name = '';
 	let currencySymbol = '$';
 	let validated: boolean | undefined = undefined;
@@ -31,7 +32,7 @@
 		name: yup.string().required(),
 		cost: yup.number().required().positive(),
 		currency: yup.string().required(),
-		date: yup.date().max(new Date())
+		date: yup.date().required().max(new Date())
 	});
 
 	fiats.subscribe((value) => {
@@ -45,6 +46,7 @@
 			(c: { code: string; symbol: string }) => c.code === selectedCurrency
 		);
 		currencySymbol = selectedCurrencyData.symbol || '$';
+		validateField('currency', currency);
 	};
 
 	async function handleSubmit(event: Event) {
@@ -63,7 +65,7 @@
 			validationErrors = {};
 
 			await saveFormData();
-			isOpen = false;
+			onClose();
 		} catch (error) {
 			validated = false;
 			validationErrors = (error as yup.ValidationError).inner.reduce((acc: any, err) => {
@@ -87,7 +89,7 @@
 		validateField('date', date);
 	};
 
-	const validateField = async (field: string, value: string | number | Date) => {
+	const validateField = async (field: string, value: string | number | Date | undefined) => {
 		try {
 			await schema.validateAt(field, { [field]: value });
 			validationErrors[field] = '';
@@ -103,9 +105,11 @@
 			currency,
 			date
 		};
-		const price = await liveCoinWatchApi.getCoinPrice(new Date(date), currency);
+		const validDate = new Date(date as Date);
+		const price = await liveCoinWatchApi.getCoinPrice(validDate, currency);
 		user.addAsset({
 			...formData,
+			date: validDate,
 			coin: price
 		});
 	}
@@ -115,32 +119,34 @@
 	<ModalBody>
 		<Form {validated} on:submit={handleSubmit}>
 			<FormGroup>
+				<Label for="name">Name</Label>
 				<Input
 					placeholder="Name"
 					bind:value={name}
-					invalid={validationErrors.name !== undefined}
-					valid={validationErrors.name === undefined}
 					on:change={handleNameChange}
+					invalid={!!validationErrors.name}
 				/>
+				{#if validationErrors.name}
+					<div class="invalid-feedback" style="display: block;">{validationErrors.name}</div>
+				{/if}
 			</FormGroup>
 			<FormGroup>
+				<Label for="cost">Cost</Label>
 				<InputGroup>
 					<InputGroupText>{currencySymbol}</InputGroupText>
 					<Input
 						type="number"
 						placeholder="0.00"
 						bind:value={cost}
-						invalid={validationErrors.cost !== undefined}
-						valid={validationErrors.cost === undefined}
 						on:change={handleCostChange}
+						invalid={!!validationErrors.cost}
 					/>
 					<InputGroupText style="padding: 0">
 						<Input
-							invalid={validationErrors.currency !== undefined}
-							valid={validationErrors.currency === undefined}
 							type="select"
 							on:change={handleCurrencyChange}
 							bind:value={currency}
+							invalid={!!validationErrors.currency}
 							style=" border-top-left-radius: 0; border-bottom-left-radius: 0"
 						>
 							{#each data as c}
@@ -148,16 +154,24 @@
 							{/each}
 						</Input>
 					</InputGroupText>
+					{#if validationErrors.cost || validationErrors.currency}
+						<div class="invalid-feedback" style="display: block;">
+							{validationErrors.cost || validationErrors.currency}
+						</div>
+					{/if}
 				</InputGroup>
 			</FormGroup>
 			<FormGroup>
+				<Label for="date">Date of purchase</Label>
 				<Input
 					type="date"
 					bind:value={date}
-					invalid={validationErrors.date !== undefined}
-					valid={validationErrors.date === undefined}
 					on:change={handleDateChange}
+					invalid={!!validationErrors.date}
 				/>
+				{#if validationErrors.date}
+					<div class="invalid-feedback" style="display: block;">{validationErrors.date}</div>
+				{/if}
 			</FormGroup>
 		</Form>
 	</ModalBody>

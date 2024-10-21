@@ -1,12 +1,22 @@
 import { writable } from 'svelte/store';
 import { liveCoinWatchApi } from '$lib/sdks/livecoinwatch.api';
 
-export const fiats = writable({});
+const store = writable({});
 
-try {
-	const data = await liveCoinWatchApi.getAllFiats(fetch);
+const refresh = async () => {
+	try {
+		const data = await liveCoinWatchApi.getAllFiats(fetch);
 
-	fiats.set(data);
-} catch (error) {
-	console.error('Failed to fetch fiats', error);
-}
+		store.set(data);
+	} catch (error) {
+		store.set({});
+		console.error('Failed to fetch fiats', error);
+	}
+};
+
+export const fiats = {
+	subscribe: store.subscribe,
+	refresh
+};
+
+await refresh();
